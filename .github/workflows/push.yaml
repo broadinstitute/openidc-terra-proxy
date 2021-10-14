@@ -44,7 +44,7 @@ jobs:
         env:
           DEFAULT_BUMP: patch
           GITHUB_TOKEN: ${{ secrets.BROADBOT_TOKEN }}
-          RELEASE_BRANCHES: master
+          RELEASE_BRANCHES: main
           WITH_V: true
 
       - name: Auth to GCP
