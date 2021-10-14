@@ -11,7 +11,6 @@ if [ -z "$ALLOW_HEADERS3" ] ; then
     export ALLOW_HEADERS3=
 fi
 
-
 # update ALLOW_METHODS3
 if [ -z "$ALLOW_METHODS3" ] ; then
     export ALLOW_METHODS3=
