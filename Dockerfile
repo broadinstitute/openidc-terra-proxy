@@ -62,9 +62,11 @@ RUN a2enmod authnz_ldap
 
 COPY install-oauth2.sh /tmp/install-oauth2.sh
 RUN chmod +x /tmp/install-oauth2.sh && \
+    apt-get update -y && \
+    apt-get install -y libhiredis0.13 && \
     /tmp/install-oauth2.sh && \
     wget https://raw.githubusercontent.com/zmartzone/mod_oauth2/master/oauth2.conf -P /etc/apache2/mods-available/
-COPY oauth2.load etc/apache2/mods-available/oauth2.load
+COPY oauth2.load /etc/apache2/mods-available/oauth2.load
 RUN a2enmod oauth2
 
 RUN apt-get update && apt-get upgrade -yq && \
