@@ -31,5 +31,6 @@ This container images extends [OpenIDC BaseImage][1] and adds several features:
   * ENABLE_STACKDRIVER: Set to *yes* to enable Stackdriver Virtual Host. Default: None
   * LDAP_CACHE_TTL: The LDAP cache timeout.  Default: __60__
   * PROXY_PATH3: The Apache `Location` to configure with OAuth2.0 authentication, which will require a valid Google token to access.  Default: __/register__
+  * INTROSPECT_PATH: The path to the RFC 7662 introspection endpoint.  Note this must end with a slash. Default: /introspect/
 
 [1]: https://github.com/broadinstitute/openidc-baseimage "OpenIDC BaseImage"

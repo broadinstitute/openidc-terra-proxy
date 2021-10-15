@@ -157,3 +157,9 @@ fi
 if [ -z "$FILTER3" ] ; then
     export FILTER3=
 fi
+
+# update INTROSPECT_PATH
+if [ -z "INTROSPECT_PATH" ] ; then
+    export INTROSPECT_PATH='/introspect/'
+fi
+

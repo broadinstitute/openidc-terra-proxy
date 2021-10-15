@@ -72,3 +72,5 @@ RUN a2enmod oauth2
 RUN apt-get update && apt-get upgrade -yq && \
     apt-get -qy install php libapache2-mod-php php-curl
 COPY php.load /etc/apache2/mods-available/php.load
+
+COPY introspect.php /app/introspect/index.php
