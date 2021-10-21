@@ -167,3 +167,14 @@ if [ -z "$INTROSPECT_PATH" ] ; then
     export INTROSPECT_PATH='/introspect/'
 fi
 
+# update ENVIRONMENT
+if [ -z "$ENVIRONMENT" ] ; then
+    export ENVIRONMENT='dev'
+fi
+
+# update ALLOW_EXPRESSION
+if [ -z "$ALLOW_EXPRESSION" ] ; then
+    export ALLOW_EXPRESSION='true'
+fi
+
+
