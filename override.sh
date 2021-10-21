@@ -26,10 +26,14 @@ fi
 # update AUTH_TYPE2
 if [ -z "$AUTH_TYPE2" ] ; then
     export AUTH_TYPE2='AuthType oauth2'
+elif [ "$AUTH_TYPE2" = 'AuthType oauth20' ] ; then
+    export AUTH_TYPE2='AuthType oauth2'
 fi
 
 # update AUTH_TYPE3
 if [ -z "$AUTH_TYPE3" ] ; then
+    export AUTH_TYPE3='AuthType oauth2'
+elif [ "$AUTH_TYPE3" = 'AuthType oauth20' ] ; then
     export AUTH_TYPE3='AuthType oauth2'
 fi
 
