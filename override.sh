@@ -23,9 +23,18 @@ elif [ "$AUTH_REQUIRE3" = '(none)' ]; then
     export AUTH_REQUIRE3=
 fi
 
+# update AUTH_TYPE2
+if [ -z "$AUTH_TYPE2" ] ; then
+    export AUTH_TYPE2='AuthType oauth2'
+elif [ "$AUTH_TYPE2" = 'AuthType oauth20' ] ; then
+    export AUTH_TYPE2='AuthType oauth2'
+fi
+
 # update AUTH_TYPE3
 if [ -z "$AUTH_TYPE3" ] ; then
-    export AUTH_TYPE3='AuthType oauth20'
+    export AUTH_TYPE3='AuthType oauth2'
+elif [ "$AUTH_TYPE3" = 'AuthType oauth20' ] ; then
+    export AUTH_TYPE3='AuthType oauth2'
 fi
 
 # update AUTH_LDAP_BIND_DN
@@ -152,3 +161,20 @@ fi
 if [ -z "$FILTER3" ] ; then
     export FILTER3=
 fi
+
+# update INTROSPECT_PATH
+if [ -z "$INTROSPECT_PATH" ] ; then
+    export INTROSPECT_PATH='/introspect/'
+fi
+
+# update ENVIRONMENT
+if [ -z "$ENVIRONMENT" ] ; then
+    export ENVIRONMENT='dev'
+fi
+
+# update ALLOW_EXPRESSION
+if [ -z "$ALLOW_EXPRESSION" ] ; then
+    export ALLOW_EXPRESSION='true'
+fi
+
+

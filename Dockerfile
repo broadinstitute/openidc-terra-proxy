@@ -1,5 +1,7 @@
 FROM broadinstitute/openidc-baseimage:3.0
-ENV MOD_SECURITY_VERSION=2.9.2
+ENV MOD_SECURITY_VERSION=2.9.2 \
+    LIBOAUTH2_VERSION=1.4.2 \
+    OAUTH2_VERSION=3.2.1
 
 RUN apt-get update && apt-get upgrade -yq && \
     apt-get install -qy libyajl-dev python libpcre3 libpcre3-dev  git  apache2-dev wget libxml2-dev lua5.1 lua5.1-dev && \
@@ -57,3 +59,18 @@ RUN cd /root && wget https://us.static.tcell.insight.rapid7.com/downloads/apache
 
 COPY tcell.load /etc/apache2/mods-available/tcell.load
 RUN a2enmod authnz_ldap
+
+COPY install-oauth2.sh /tmp/install-oauth2.sh
+RUN chmod +x /tmp/install-oauth2.sh && \
+    apt-get update -y && \
+    apt-get install -y libhiredis0.13 && \
+    /tmp/install-oauth2.sh
+COPY oauth2.load /etc/apache2/mods-available/oauth2.load
+COPY oauth2.conf /etc/apache2/mods-available/oauth2.conf
+RUN a2enmod oauth2
+
+RUN apt-get update && apt-get upgrade -yq && \
+    apt-get -qy install php libapache2-mod-php php-curl
+COPY php.load /etc/apache2/mods-available/php.load
+
+COPY introspect.php /app/introspect/index.php
