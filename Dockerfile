@@ -45,7 +45,9 @@ COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
 COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
 COPY site.conf stackdriver.conf /etc/apache2/sites-available/
-COPY mpm_event.conf /etc/apache2/conf-enabled/
+# TODO: consider using mpm_event instead of mpm_prefork for better performance.
+# See: https://github.com/broadinstitute/openidc-terra-proxy/issues/3
+COPY mpm_prefork.conf /etc/apache2/mods-available/
 COPY override.sh /etc/apache2/
 
 RUN rm -f /root/modsecurity-${MOD_SECURITY_VERSION}.tar.gz
