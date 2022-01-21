@@ -45,10 +45,11 @@ COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
 COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
 COPY site.conf stackdriver.conf /etc/apache2/sites-available/
-# TODO: consider using mpm_event instead of mpm_prefork for better performance.
-# See: https://github.com/broadinstitute/openidc-terra-proxy/issues/3
-COPY mpm_prefork.conf /etc/apache2/mods-available/
 COPY override.sh /etc/apache2/
+COPY mpm_event.conf /etc/apache2/mods-available/
+RUN a2dismod mpm_prefork && \
+    a2enmod mpm_event && \
+    a2enmod proxy_fcgi
 
 RUN rm -f /root/modsecurity-${MOD_SECURITY_VERSION}.tar.gz
 RUN rm -rf /root/modsecurity-${MOD_SECURITY_VERSION}
@@ -72,7 +73,12 @@ COPY oauth2.conf /etc/apache2/mods-available/oauth2.conf
 RUN a2enmod oauth2
 
 RUN apt-get update && apt-get upgrade -yq && \
-    apt-get -qy install php libapache2-mod-php php-curl
-COPY php.load /etc/apache2/mods-available/php.load
+    apt-get -qy install php-fpm libapache2-mod-fcgid php-curl && \
+    a2enconf php7.2-fpm
+
+COPY run-php-fpm.sh /tmp/run-php-fpm.sh
+RUN chmod +x /tmp/run-php-fpm.sh && \
+    mkdir -p /etc/service/php-fpm && \
+    mv /tmp/run-php-fpm.sh /etc/service/php-fpm/run
 
 COPY introspect.php /app/introspect/index.php
