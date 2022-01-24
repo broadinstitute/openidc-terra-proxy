@@ -46,10 +46,11 @@ COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
 COPY site.conf stackdriver.conf /etc/apache2/sites-available/
 COPY override.sh /etc/apache2/
-COPY mpm_event.conf /etc/apache2/mods-available/
+COPY mpm_event.conf /etc/apache2/conf-available/
 RUN a2dismod mpm_prefork && \
     a2enmod mpm_event && \
-    a2enmod proxy_fcgi
+    a2enmod proxy_fcgi && \
+    a2enconf mpm_event
 
 RUN rm -f /root/modsecurity-${MOD_SECURITY_VERSION}.tar.gz
 RUN rm -rf /root/modsecurity-${MOD_SECURITY_VERSION}
