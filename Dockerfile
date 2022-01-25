@@ -45,8 +45,12 @@ COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
 COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
 COPY site.conf stackdriver.conf /etc/apache2/sites-available/
-COPY mpm_event.conf /etc/apache2/conf-enabled/
 COPY override.sh /etc/apache2/
+COPY mpm_event.conf /etc/apache2/conf-available/
+RUN a2dismod mpm_prefork && \
+    a2enmod mpm_event && \
+    a2enmod proxy_fcgi && \
+    a2enconf mpm_event
 
 RUN rm -f /root/modsecurity-${MOD_SECURITY_VERSION}.tar.gz
 RUN rm -rf /root/modsecurity-${MOD_SECURITY_VERSION}
@@ -70,7 +74,13 @@ COPY oauth2.conf /etc/apache2/mods-available/oauth2.conf
 RUN a2enmod oauth2
 
 RUN apt-get update && apt-get upgrade -yq && \
-    apt-get -qy install php libapache2-mod-php php-curl
-COPY php.load /etc/apache2/mods-available/php.load
+    apt-get -qy install php-fpm libapache2-mod-fcgid php-curl && \
+    a2enconf php7.2-fpm
+
+COPY www.conf /etc/php/7.2/fpm/pool.d/www.conf
+COPY run-php-fpm.sh /tmp/run-php-fpm.sh
+RUN chmod +x /tmp/run-php-fpm.sh && \
+    mkdir -p /etc/service/php-fpm && \
+    mv /tmp/run-php-fpm.sh /etc/service/php-fpm/run
 
 COPY introspect.php /app/introspect/index.php
