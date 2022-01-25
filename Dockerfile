@@ -77,6 +77,7 @@ RUN apt-get update && apt-get upgrade -yq && \
     apt-get -qy install php-fpm libapache2-mod-fcgid php-curl && \
     a2enconf php7.2-fpm
 
+COPY www.conf /etc/php/7.2/fpm/pool.d/www.conf
 COPY run-php-fpm.sh /tmp/run-php-fpm.sh
 RUN chmod +x /tmp/run-php-fpm.sh && \
     mkdir -p /etc/service/php-fpm && \
