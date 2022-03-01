@@ -21,7 +21,9 @@ curl_setopt_array($curl, array(
   CURLOPT_CUSTOMREQUEST => 'POST',
   CURLOPT_POSTFIELDS => 'access_token='.$access_token.'&token_type_hint=access_token',
   CURLOPT_HTTPHEADER => array(
-    'Content-Type: application/x-www-form-urlencoded'
+    'Content-Type: application/x-www-form-urlencoded',
+    // Disable Expect: 100-continue since it's not supported by the google tokeninfo endpoint.
+    'Expect:'
   ),
 ));
 
