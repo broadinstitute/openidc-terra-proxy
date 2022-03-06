@@ -1,0 +1,225 @@
+#!/bin/bash
+
+set -e
+
+export LANG=C
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export TZ=America/New_York
+
+# update SERVER_ADMIN
+if [ -z "$SERVER_ADMIN" ] ; then
+    export SERVER_ADMIN=webmaster@example.org
+fi
+
+# update SERVER_NAME
+if [ -z "$SERVER_NAME" ] ; then
+    export SERVER_NAME=localhost
+fi
+
+# update PROXY_PATH
+if [ -z "$PROXY_PATH" ] ; then
+    export PROXY_PATH=/
+fi
+
+# update PROXY_PATH2
+if [ -z "$PROXY_PATH2" ] ; then
+    export PROXY_PATH2=/api
+fi
+
+# update PROXY_PATH3
+if [ -z "$PROXY_PATH3" ] ; then
+    export PROXY_PATH3=/register
+fi
+
+# update PROXY_URL
+if [ -z "$PROXY_URL" ] ; then
+    export PROXY_URL=http://app:8080/
+fi
+
+# update PROXY_URL2
+if [ -z "$PROXY_URL2" ] ; then
+    export PROXY_URL2=http://app:8080/api
+fi
+
+# update PROXY_URL3
+if [ -z "$PROXY_URL3" ] ; then
+    export PROXY_URL3=http://app:8080/register
+fi
+
+# update FILTER
+if [ -z "$FILTER" ] ; then
+    export FILTER=
+fi
+
+# update FILTER2
+if [ -z "$FILTER2" ] ; then
+    export FILTER2=
+fi
+
+# update FILTER3
+if [ -z "$FILTER3" ] ; then
+    export FILTER3=
+fi
+
+# update AUTH_REQUIRE
+if [ -z "$AUTH_REQUIRE" ] ; then
+    export AUTH_REQUIRE='Require all granted'
+elif [ "$AUTH_REQUIRE" = '(none)' ]; then
+    export AUTH_REQUIRE=
+fi
+
+# update AUTH_REQUIRE2
+if [ -z "$AUTH_REQUIRE2" ] ; then
+    export AUTH_REQUIRE2='Require valid-user'
+elif [ "$AUTH_REQUIRE2" = '(none)' ]; then
+    export AUTH_REQUIRE2=
+fi
+
+# update AUTH_REQUIRE3
+if [ -z "$AUTH_REQUIRE3" ] ; then
+    export AUTH_REQUIRE3='Require valid-user'
+elif [ "$AUTH_REQUIRE3" = '(none)' ]; then
+    export AUTH_REQUIRE3=
+fi
+
+# update AUTH_TYPE
+if [ -z "$AUTH_TYPE" ] ; then
+    export AUTH_TYPE='AuthType None'
+fi
+
+# update AUTH_TYPE2
+if [ -z "$AUTH_TYPE2" ] ; then
+    export AUTH_TYPE2='AuthType oauth2'
+fi
+
+# update AUTH_TYPE3
+if [ -z "$AUTH_TYPE3" ] ; then
+    export AUTH_TYPE3='AuthType oauth2'
+fi
+
+# update AUTH_LDAP_BIND_DN
+if [ -z "$AUTH_LDAP_BIND_DN" ] ; then
+    export AUTH_LDAP_BIND_DN=
+fi
+
+# update AUTH_LDAP_BIND_DN2
+if [ -z "$AUTH_LDAP_BIND_DN2" ] ; then
+    export AUTH_LDAP_BIND_DN2=
+fi
+
+# update AUTH_LDAP_BIND_DN3
+if [ -z "$AUTH_LDAP_BIND_DN3" ] ; then
+    export AUTH_LDAP_BIND_DN3=
+fi
+
+# update AUTH_LDAP_BIND_PASSWORD
+if [ -z "$AUTH_LDAP_BIND_PASSWORD" ] ; then
+    export AUTH_LDAP_BIND_PASSWORD=
+fi
+
+# update AUTH_LDAP_BIND_PASSWORD2
+if [ -z "$AUTH_LDAP_BIND_PASSWORD2" ] ; then
+    export AUTH_LDAP_BIND_PASSWORD2=
+fi
+
+# update AUTH_LDAP_BIND_PASSWORD3
+if [ -z "$AUTH_LDAP_BIND_PASSWORD3" ] ; then
+    export AUTH_LDAP_BIND_PASSWORD3=
+fi
+
+# update AUTH_LDAP_URL
+if [ -z "$AUTH_LDAP_URL" ] ; then
+    export AUTH_LDAP_URL=
+fi
+
+# update AUTH_LDAP_URL2
+if [ -z "$AUTH_LDAP_URL2" ] ; then
+    export AUTH_LDAP_URL2=
+fi
+
+# update AUTH_LDAP_URL3
+if [ -z "$AUTH_LDAP_URL3" ] ; then
+    export AUTH_LDAP_URL3=
+fi
+
+# update AUTH_LDAP_GROUP_ATTR
+if [ -z "$AUTH_LDAP_GROUP_ATTR" ] ; then
+    export AUTH_LDAP_GROUP_ATTR=
+fi
+
+# update AUTH_LDAP_GROUP_ATTR2
+if [ -z "$AUTH_LDAP_GROUP_ATTR2" ] ; then
+    export AUTH_LDAP_GROUP_ATTR2=
+fi
+
+# update AUTH_LDAP_GROUP_ATTR3
+if [ -z "$AUTH_LDAP_GROUP_ATTR3" ] ; then
+    export AUTH_LDAP_GROUP_ATTR3=
+fi
+
+# update LDAP_CACHE_TTL
+if [ -z "$LDAP_CACHE_TTL" ] ; then
+    export LDAP_CACHE_TTL='60'
+fi
+
+# update CALLBACK_URI
+if [ -z "$CALLBACK_URI" ] ; then
+    export CALLBACK_URI="https://${SERVER_NAME}/oauth2callback"
+fi
+
+# update CALLBACK_PATH
+if [ -z "$CALLBACK_PATH" ] ; then
+    # shellcheck disable=SC2006
+    CALLBACK_PATH=/`echo $CALLBACK_URI | rev | cut -d/ -f1 | rev`
+    export CALLBACK_PATH
+fi
+
+# update INTROSPECT_PATH
+if [ -z "$INTROSPECT_PATH" ] ; then
+    export INTROSPECT_PATH='/introspect/'
+fi
+
+# set httpd port
+if [ -z "$HTTPD_PORT" ] ; then
+    export HTTPD_PORT=80
+fi
+
+# set httpd ssl port
+if [ -z "$SSL_HTTPD_PORT" ] ; then
+    export SSL_HTTPD_PORT=443
+fi
+
+# update LOG_LEVEL
+if [ -z "$LOG_LEVEL" ] ; then
+    export LOG_LEVEL=warn
+fi
+
+# update PROXY_TIMEOUT
+if [ -z "$PROXY_TIMEOUT" ] ; then
+    export PROXY_TIMEOUT='300'
+fi
+
+# update ENVIRONMENT
+if [ -z "$ENVIRONMENT" ] ; then
+    export ENVIRONMENT='dev'
+fi
+
+# update ALLOW_EXPRESSION
+if [ -z "$ALLOW_EXPRESSION" ] ; then
+    export ALLOW_EXPRESSION='true'
+fi
+
+# set SSL protocol
+if [ -z "$SSL_PROTOCOL" ] ; then
+    export SSL_PROTOCOL='-SSLv3 -TLSv1 -TLSv1.1 +TLSv1.2'
+fi
+
+# set the SSL Cipher Suite
+if [ -z "$SSL_CIPHER_SUITE" ] ; then
+    export SSL_CIPHER_SUITE='ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-ES256-SHA:!3DES:!ADH:!DES:!DH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!EXPORT:!KRB5-DES-CBC3-SHA:!MD5:!PSK:!RC4:!aECDH:!aNULL:!eNULL'
+fi
+
+# Apache gets grumpy about PID files pre-existing
+rm -f /var/run/httpd/httpd.pid
+
+exec httpd -D FOREGROUND $@

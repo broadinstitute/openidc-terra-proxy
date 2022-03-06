@@ -1,0 +1,55 @@
+FROM registry.access.redhat.com/ubi8/ubi-minimal
+
+ENV LIBOAUTH2_VERSION=1.4.4.1 \
+    OAUTH2_VERSION=3.2.2
+
+# Install dependencies
+RUN microdnf --nodocs -y install \
+  httpd \
+  php \
+  procps \
+  wget \
+  tar \
+  openssl \
+  jansson \
+  libmemcached \
+  mod_ssl \
+  mod_ldap \
+  && microdnf clean all
+
+# Install hiredis (dependency of liboauth2) from EPEL
+RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
+  && microdnf --nodocs -y install \
+    hiredis-0.13.3-13.el8.x86_64 \
+  && microdnf clean all
+
+# Install tcell module
+RUN mkdir -p /tmp/build && cd /tmp/build \
+   && wget https://us.static.tcell.insight.rapid7.com/downloads/apacheagent/apache24_tcellagent-3.1.0-linux-x86_64.tgz \ 
+   && tar -xzf apache24_tcellagent-3.1.0-linux-x86_64.tgz \
+   && cp -rfp apache_tcellagent-3.1.0-linux-x86_64/centos/mod_agenttcell.so /etc/httpd/modules/mod_agenttcell.so
+
+# Install mod_oauth2 module
+RUN rpm -ivh \
+  https://mod-auth-openidc.org/download/cjose-0.6.1.5-2.el8.x86_64.rpm \
+  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
+  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-apache-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
+  https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
+
+# Copy configs
+COPY site.conf stackdriver.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
+COPY introspect.php /app/introspect/index.php
+COPY run-httpd /usr/bin
+COPY www.conf /etc/php-fpm.d/www.conf
+COPY setup-httpd.sh /tmp/build/setup-httpd.sh
+
+# Setup httpd and php-fpm
+RUN chmod a+x /usr/bin/run-httpd \
+  && chmod a+x /tmp/build/setup-httpd.sh \
+  && /tmp/build/setup-httpd.sh \
+  && mkdir -p /run/php-fpm \
+  && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
+  && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
+  && rm -rf /tmp/build
+
+CMD php-fpm & /usr/bin/run-httpd
