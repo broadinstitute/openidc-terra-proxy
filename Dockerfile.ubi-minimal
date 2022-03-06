@@ -52,4 +52,9 @@ RUN chmod a+x /usr/bin/run-httpd \
   && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
   && rm -rf /tmp/build
 
+EXPOSE 8080
+EXPOSE 8443
+EXPOSE 80
+EXPOSE 443
+
 CMD php-fpm & /usr/bin/run-httpd
