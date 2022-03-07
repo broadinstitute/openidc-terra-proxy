@@ -12,8 +12,5 @@ openssl req -newkey rsa:4096 -days 365 -nodes -x509 \
     -keyout /etc/ssl/private/server.key \
     -out /etc/ssl/certs/server.crt
 
-# Use the snakeoil cert as the ca-bundle.crt as well
-cp /etc/ssl/certs/server.crt /etc/ssl/certs/ca-bundle.crt
-
 # Remove default ssl.conf
 rm /etc/httpd/conf.d/ssl.conf
