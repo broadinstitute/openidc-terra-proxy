@@ -40,6 +40,7 @@ RUN rpm -ivh \
 
 # Copy configs
 COPY site.conf stackdriver.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
+COPY tcell.load /etc/httpd/conf.modules.d/99-tcell.load
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
 COPY www.conf /etc/php-fpm.d/www.conf
