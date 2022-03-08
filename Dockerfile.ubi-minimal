@@ -39,7 +39,7 @@ RUN rpm -ivh \
   https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
 
 # Copy configs
-COPY site.conf stackdriver.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
+COPY site.conf stackdriver.conf mpm_event.conf oauth2.conf /etc/httpd/conf.d/
 COPY tcell.load /etc/httpd/conf.modules.d/99-tcell.load
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
