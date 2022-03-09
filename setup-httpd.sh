@@ -4,6 +4,10 @@ set -e
 
 echo "Setting up http environment"
 
+sed -i 's/Listen 80/Listen 0.0.0.0:\$\{HTTPD_PORT\}\nListen 0.0.0.0:\$\{SSL_HTTPD_PORT\}/' /etc/httpd/conf/httpd.conf
+sed -i 's/ServerAdmin root@localhost/ServerAdmin \$\{SERVER_ADMIN\}/' /etc/httpd/conf/httpd.conf
+sed -i 's/\#ServerName www.example.com:80/ServerName \$\{SERVER_NAME\}/' /etc/httpd/conf/httpd.conf
+
 ln -s /etc/pki/tls/private /etc/ssl/private
 
 # Generate a snakeoil certificate in case it's needed
