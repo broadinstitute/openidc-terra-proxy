@@ -72,14 +72,29 @@ if [ -z "$AUTH_LDAP_URL" ] ; then
     export AUTH_LDAP_URL=
 fi
 
+# update AUTH_LDAP_URL_B2C
+if [ -z "$AUTH_LDAP_URL_B2C" ] ; then
+    export AUTH_LDAP_URL_B2C=
+fi
+
 # update AUTH_LDAP_URL2
 if [ -z "$AUTH_LDAP_URL2" ] ; then
     export AUTH_LDAP_URL2=
 fi
 
+# update AUTH_LDAP_URL2_B2C
+if [ -z "$AUTH_LDAP_URL2_B2C" ] ; then
+    export AUTH_LDAP_URL2_B2C=
+fi
+
 # update AUTH_LDAP_URL3
 if [ -z "$AUTH_LDAP_URL3" ] ; then
     export AUTH_LDAP_URL3=
+fi
+
+# update AUTH_LDAP_URL3_B2C
+if [ -z "$AUTH_LDAP_URL3_B2C" ] ; then
+    export AUTH_LDAP_URL3_B2C=
 fi
 
 # update AUTH_LDAP_GROUP_ATTR
