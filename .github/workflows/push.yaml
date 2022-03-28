@@ -48,7 +48,7 @@ jobs:
           WITH_V: true
 
       - name: Auth to GCP
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           version: '345.0.0'
           service_account_email: ${{ secrets.GCR_PUBLISH_EMAIL }}
