@@ -16,6 +16,7 @@ RUN microdnf --nodocs -y install \
   jansson \
   libmemcached \
   mod_ssl \
+  mod_ldap \
   && microdnf clean all
 
 # Install hiredis (dependency of liboauth2) from EPEL
