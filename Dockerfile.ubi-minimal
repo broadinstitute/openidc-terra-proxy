@@ -53,6 +53,7 @@ RUN chmod a+x /usr/bin/run-httpd \
   && mkdir -p /run/php-fpm \
   && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
+  && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
 
 EXPOSE 80
