@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
-ENV LIBOAUTH2_VERSION=1.4.4.1 \
-    OAUTH2_VERSION=3.2.2
+ENV LIBOAUTH2_VERSION=1.4.5 \
+    OAUTH2_VERSION=3.2.3
 
 # Install dependencies
 RUN microdnf --nodocs -y install \
