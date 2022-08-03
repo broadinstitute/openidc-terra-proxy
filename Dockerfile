@@ -1,7 +1,7 @@
 FROM broadinstitute/openidc-baseimage:3.0
 ENV MOD_SECURITY_VERSION=2.9.2 \
-    LIBOAUTH2_VERSION=1.4.4.1 \
-    OAUTH2_VERSION=3.2.2
+    LIBOAUTH2_VERSION=1.4.5 \
+    OAUTH2_VERSION=3.2.3
 
 RUN apt-get update && apt-get upgrade -yq && \
     apt-get install -qy libyajl-dev python libpcre3 libpcre3-dev  git  apache2-dev wget libxml2-dev lua5.1 lua5.1-dev && \
