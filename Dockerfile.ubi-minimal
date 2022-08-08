@@ -39,7 +39,7 @@ RUN rpm -ivh \
   https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
 
 # Copy configs
-COPY site.conf stackdriver.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
+COPY site.conf stackdriver.conf mpm_prefork.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
 COPY tcell.load /etc/httpd/conf.modules.d/99-tcell.load
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
@@ -54,6 +54,8 @@ RUN chmod a+x /usr/bin/run-httpd \
   && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
+  && sed -i 's/LoadModule mpm_event_module modules\/mod_mpm_event.so/\#LoadModule mpm_event_module modules\/mod_mpm_event.so/' /etc/httpd/conf.modules.d/00-mpm.conf \
+  && sed -i 's/\#LoadModule mpm_prefork_module modules\/mod_mpm_prefork.so/LoadModule mpm_prefork_module modules\/mod_mpm_prefork.so/' /etc/httpd/conf.modules.d/00-mpm.conf \
   && rm -rf /tmp/build
 
 EXPOSE 80
