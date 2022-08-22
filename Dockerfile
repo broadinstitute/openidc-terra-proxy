@@ -1,6 +1,6 @@
 FROM broadinstitute/openidc-baseimage:3.0
 ENV MOD_SECURITY_VERSION=2.9.2 \
-    LIBOAUTH2_VERSION=1.4.5 \
+    LIBOAUTH2_VERSION=1.4.5.1 \
     OAUTH2_VERSION=3.2.3
 
 RUN apt-get update && apt-get upgrade -yq && \
