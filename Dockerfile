@@ -44,7 +44,7 @@ RUN cd /root && \
 COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
 COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
-COPY site.conf stackdriver.conf /etc/apache2/sites-available/
+COPY site.conf /etc/apache2/sites-available/
 COPY override.sh /etc/apache2/
 COPY mpm_event.conf /etc/apache2/conf-available/
 RUN a2dismod mpm_prefork && \

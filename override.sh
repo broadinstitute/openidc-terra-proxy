@@ -148,10 +148,6 @@ if [ -z "$PROXY_TIMEOUT" ] ; then
     export PROXY_TIMEOUT='650'
 fi
 
-if [ "$ENABLE_STACKDRIVER" = "yes" ]; then
-    /usr/sbin/a2ensite stackdriver
-fi
-
 if [ "$ENABLE_MODSECURITY" = "yes" ]; then
     /usr/sbin/a2enmod security2
     /usr/sbin/a2enmod unique_id
