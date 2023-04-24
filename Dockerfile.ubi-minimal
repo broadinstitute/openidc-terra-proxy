@@ -34,9 +34,9 @@ RUN mkdir -p /tmp/build && cd /tmp/build \
 # Install mod_oauth2 module
 RUN rpm -ivh \
   https://mod-auth-openidc.org/download/cjose-0.6.1.5-2.el8.x86_64.rpm \
-  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
-  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-apache-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
-  https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
+  "https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm" \
+  "https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-apache-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm" \
+  "https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm"
 
 # Copy configs
 COPY site.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
