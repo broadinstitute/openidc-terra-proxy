@@ -36,5 +36,5 @@ RUN cd /root && \
       rules/*.data /etc/modsecurity/
 
 
-COPY site.conf stackdriver.conf /etc/apache2/sites-available/
+COPY site.conf /etc/apache2/sites-available/
 COPY override.sh /etc/apache2/
