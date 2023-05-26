@@ -31,20 +31,20 @@ RUN cd /root && \
     mkdir rulesworking && \
     mkdir rulesfinal && \
     cp -rfp rules/REQUEST-921-PROTOCOL-ATTACK.conf \
-      rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf \
-      rules/REQUEST-931-APPLICATION-ATTACK-RFI.conf \
-      rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf \
-      rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf \
-      rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf \
-      rules/RESPONSE-951-DATA-LEAKAGES-SQL.conf rulesworking/ && \
-      util/join-multiline-rules/join.py rulesworking/*.conf > rulesfinal/rules.conf && \
-      cp -rfp rulesfinal/* /etc/modsecurity && \
-      cp -rfp rules/*.data /etc/modsecurity/
+    rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf \
+    rules/REQUEST-931-APPLICATION-ATTACK-RFI.conf \
+    rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf \
+    rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf \
+    rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf \
+    rules/RESPONSE-951-DATA-LEAKAGES-SQL.conf rulesworking/ && \
+    util/join-multiline-rules/join.py rulesworking/*.conf > rulesfinal/rules.conf && \
+    cp -rfp rulesfinal/* /etc/modsecurity && \
+    cp -rfp rules/*.data /etc/modsecurity/
 
 COPY modsecurity.conf /etc/modsecurity/modsecurity.conf
 COPY unicode.mapping /etc/modsecurity/unicode.mapping
 
-COPY site.conf /etc/apache2/sites-available/
+COPY site.conf graceful_shutdown.conf /etc/apache2/sites-available/
 COPY override.sh /etc/apache2/
 COPY mpm_event.conf /etc/apache2/conf-available/
 RUN a2dismod mpm_prefork && \
@@ -84,3 +84,8 @@ RUN chmod +x /tmp/run-php-fpm.sh && \
     mv /tmp/run-php-fpm.sh /etc/service/php-fpm/run
 
 COPY introspect.php /app/introspect/index.php
+
+# Apache runs graceful stop only upon SIGWINCH. Normal SIGTERM is an immediate stop.
+# GracefulShutdownTimeout directive configured via graceful_shutdown.conf.
+# https://httpd.apache.org/docs/2.4/stopping.html
+STOPSIGNAL SIGWINCH
