@@ -190,6 +190,6 @@ fi
 
 # default graceful shutdown timeout
 if [ -z "$GRACEFUL_SHUTDOWN_TIMEOUT"]; then
-    export GRACEFUL_SHUTDOWN_TIMEOUT=15
+    export GRACEFUL_SHUTDOWN_TIMEOUT=25
 fi
 
