@@ -224,6 +224,11 @@ if [ "$ENABLE_TCELL" = "yes" ]; then
     mv /etc/httpd/conf.modules.d/99-tcell.load /etc/httpd/conf.modules.d/99-tcell.conf
 fi
 
+# default graceful shutdown timeout
+if [ -z "$GRACEFUL_SHUTDOWN_TIMEOUT"]; then
+    export GRACEFUL_SHUTDOWN_TIMEOUT=25
+fi
+
 # Apache gets grumpy about PID files pre-existing
 rm -f /var/run/httpd/httpd.pid
 

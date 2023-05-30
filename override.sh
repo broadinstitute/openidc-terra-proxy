@@ -188,4 +188,8 @@ if [ -z "$ALLOW_EXPRESSION" ] ; then
     export ALLOW_EXPRESSION='true'
 fi
 
+# default graceful shutdown timeout
+if [ -z "$GRACEFUL_SHUTDOWN_TIMEOUT"]; then
+    export GRACEFUL_SHUTDOWN_TIMEOUT=25
+fi
 

@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 ENV LIBOAUTH2_VERSION=1.4.5.1 \
-    OAUTH2_VERSION=3.2.3
+  OAUTH2_VERSION=3.2.3
 
 # Install dependencies
 RUN microdnf --nodocs -y install \
@@ -22,14 +22,14 @@ RUN microdnf --nodocs -y install \
 # Install hiredis (dependency of liboauth2) from EPEL
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
   && microdnf --nodocs -y install \
-    hiredis-0.13.3-13.el8.x86_64 \
+  hiredis-0.13.3-13.el8.x86_64 \
   && microdnf clean all
 
 # Install tcell module
 RUN mkdir -p /tmp/build && cd /tmp/build \
-   && wget https://us.static.tcell.insight.rapid7.com/downloads/apacheagent/apache24_tcellagent-3.1.0-linux-x86_64.tgz \ 
-   && tar -xzf apache24_tcellagent-3.1.0-linux-x86_64.tgz \
-   && cp -rfp apache_tcellagent-3.1.0-linux-x86_64/centos/mod_agenttcell.so /etc/httpd/modules/mod_agenttcell.so
+  && wget https://us.static.tcell.insight.rapid7.com/downloads/apacheagent/apache24_tcellagent-3.1.0-linux-x86_64.tgz \ 
+  && tar -xzf apache24_tcellagent-3.1.0-linux-x86_64.tgz \
+  && cp -rfp apache_tcellagent-3.1.0-linux-x86_64/centos/mod_agenttcell.so /etc/httpd/modules/mod_agenttcell.so
 
 # Install mod_oauth2 module
 RUN rpm -ivh \
@@ -39,7 +39,7 @@ RUN rpm -ivh \
   https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
 
 # Copy configs
-COPY site.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
+COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
 COPY tcell.load /etc/httpd/conf.modules.d/99-tcell.load
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
@@ -58,5 +58,10 @@ RUN chmod a+x /usr/bin/run-httpd \
 
 EXPOSE 80
 EXPOSE 443
+
+# Apache runs graceful stop only upon SIGWINCH. Normal SIGTERM is an immediate stop.
+# GracefulShutdownTimeout directive configured via graceful_shutdown.conf.
+# https://httpd.apache.org/docs/2.4/stopping.html
+STOPSIGNAL SIGWINCH
 
 CMD php-fpm & /usr/bin/run-httpd
