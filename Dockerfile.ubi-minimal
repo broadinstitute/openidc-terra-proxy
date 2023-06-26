@@ -5,6 +5,7 @@ ENV LIBOAUTH2_VERSION=1.4.5.1 \
 
 # Install dependencies
 RUN microdnf --nodocs -y install \
+  curl \
   httpd \
   php \
   php-json \
