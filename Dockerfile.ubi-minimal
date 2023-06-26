@@ -59,6 +59,7 @@ RUN chmod a+x /usr/bin/run-httpd \
 EXPOSE 80
 EXPOSE 443
 
+
 # Apache runs graceful stop only upon SIGWINCH. Normal SIGTERM is an immediate stop.
 # GracefulShutdownTimeout directive configured via graceful_shutdown.conf.
 # https://httpd.apache.org/docs/2.4/stopping.html
