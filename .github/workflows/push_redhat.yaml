@@ -10,8 +10,6 @@ name: Bump, Tag, and Publish RedHat
 # When run on a PR, it simulates bumping the tag and appends a hash to the pushed image.
 #
 # The workflow relies on github secrets:
-# - GCR_PUBLISH_EMAIL - SA email for publishing to broad-dsp-gcr-public
-# - GCR_PUBLISH_KEY_B64 - SA key (Base64-encoded JSON string) for publishing to broad-dsp-gcr-public
 # - BROADBOT_TOKEN - the broadbot token, so we can avoid two reviewer rule on GHA operations
 on:
   pull_request:
