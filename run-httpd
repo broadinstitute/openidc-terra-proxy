@@ -97,71 +97,6 @@ if [ -z "$AUTH_TYPE3" ] ; then
     export AUTH_TYPE3='AuthType oauth2'
 fi
 
-# update AUTH_LDAP_BIND_DN
-if [ -z "$AUTH_LDAP_BIND_DN" ] ; then
-    export AUTH_LDAP_BIND_DN=
-fi
-
-# update AUTH_LDAP_BIND_DN2
-if [ -z "$AUTH_LDAP_BIND_DN2" ] ; then
-    export AUTH_LDAP_BIND_DN2=
-fi
-
-# update AUTH_LDAP_BIND_DN3
-if [ -z "$AUTH_LDAP_BIND_DN3" ] ; then
-    export AUTH_LDAP_BIND_DN3=
-fi
-
-# update AUTH_LDAP_BIND_PASSWORD
-if [ -z "$AUTH_LDAP_BIND_PASSWORD" ] ; then
-    export AUTH_LDAP_BIND_PASSWORD=
-fi
-
-# update AUTH_LDAP_BIND_PASSWORD2
-if [ -z "$AUTH_LDAP_BIND_PASSWORD2" ] ; then
-    export AUTH_LDAP_BIND_PASSWORD2=
-fi
-
-# update AUTH_LDAP_BIND_PASSWORD3
-if [ -z "$AUTH_LDAP_BIND_PASSWORD3" ] ; then
-    export AUTH_LDAP_BIND_PASSWORD3=
-fi
-
-# update AUTH_LDAP_URL
-if [ -z "$AUTH_LDAP_URL" ] ; then
-    export AUTH_LDAP_URL=
-fi
-
-# update AUTH_LDAP_URL2
-if [ -z "$AUTH_LDAP_URL2" ] ; then
-    export AUTH_LDAP_URL2=
-fi
-
-# update AUTH_LDAP_URL3
-if [ -z "$AUTH_LDAP_URL3" ] ; then
-    export AUTH_LDAP_URL3=
-fi
-
-# update AUTH_LDAP_GROUP_ATTR
-if [ -z "$AUTH_LDAP_GROUP_ATTR" ] ; then
-    export AUTH_LDAP_GROUP_ATTR=
-fi
-
-# update AUTH_LDAP_GROUP_ATTR2
-if [ -z "$AUTH_LDAP_GROUP_ATTR2" ] ; then
-    export AUTH_LDAP_GROUP_ATTR2=
-fi
-
-# update AUTH_LDAP_GROUP_ATTR3
-if [ -z "$AUTH_LDAP_GROUP_ATTR3" ] ; then
-    export AUTH_LDAP_GROUP_ATTR3=
-fi
-
-# update LDAP_CACHE_TTL
-if [ -z "$LDAP_CACHE_TTL" ] ; then
-    export LDAP_CACHE_TTL='60'
-fi
-
 # update CALLBACK_URI
 if [ -z "$CALLBACK_URI" ] ; then
     export CALLBACK_URI="https://${SERVER_NAME}/oauth2callback"
@@ -219,13 +154,8 @@ if [ -z "$SSL_CIPHER_SUITE" ] ; then
     export SSL_CIPHER_SUITE='ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-ES256-SHA:!3DES:!ADH:!DES:!DH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!EXPORT:!KRB5-DES-CBC3-SHA:!MD5:!PSK:!RC4:!aECDH:!aNULL:!eNULL'
 fi
 
-# enable tcell
-if [ "$ENABLE_TCELL" = "yes" ]; then
-    mv /etc/httpd/conf.modules.d/99-tcell.load /etc/httpd/conf.modules.d/99-tcell.conf
-fi
-
 # default graceful shutdown timeout
-if [ -z "$GRACEFUL_SHUTDOWN_TIMEOUT"]; then
+if [ -z "$GRACEFUL_SHUTDOWN_TIMEOUT" ] ; then
     export GRACEFUL_SHUTDOWN_TIMEOUT=25
 fi
 
