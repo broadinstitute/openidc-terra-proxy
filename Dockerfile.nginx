@@ -37,5 +37,3 @@ RUN rpm -ivh \
   /root/rpmbuild/RPMS/x86_64/liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
   "https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-nginx-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm" \
   /root/rpmbuild/RPMS/x86_64/nginx-mod-oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm
-    
-ENTRYPOINT [ "tail", "-f", "/dev/null" ]
