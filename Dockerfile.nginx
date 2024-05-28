@@ -7,10 +7,7 @@ USER root
 
 # Install dependencies
 RUN microdnf --nodocs -y install \
-  g++ \
-  findutils \
   procps \
-  patch \
   wget \
   tar \
   openssl \
@@ -24,22 +21,21 @@ RUN microdnf --nodocs -y install \
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
   && microdnf --nodocs -y install \
   hiredis-1.0.2-1.el9.x86_64 \
+  rpmrebuild \
   && microdnf clean all
 
-# Install libmemcached (dependency of liboauth2)
-# TODO I couldn't find libmemcached-el9 in any repository so compiling from source
-# RUN wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz \
-#   && tar -xvzf libmemcached-1.0.18.tar.gz -C/tmp \
-#   && wget https://launchpadlibrarian.net/605044955/001-fix-clients_memflush-for-newer-compilers.patch \
-#   && cp 001-fix-clients_memflush-for-newer-compilers.patch /tmp/libmemcached-1.0.18
-# WORKDIR /tmp/libmemcached-1.0.18
-# RUN patch -p0 < 001-fix-clients_memflush-for-newer-compilers.patch \
-#   && ./configure && make && make install
+# Modify the liboauth2 and nginx-mod-oauth2 RPMs.
+# libmemcached was renamed to libmemcached-awesome in RHEL9. However liboauth2 still specifies a libmemcached depedency.
+# Modify the RPMs to specify libmemcached-awesome as a dependency instead. Consider opening a GitHub issue for the maintainer.
+RUN wget "https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm" \
+  && wget "https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUTH2_VERSION}/nginx-mod-oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm" \
+  && rpmrebuild --change-spec-requires='sed "s/Requires:.*libmemcached[^.]*$/Requires: libmemcached-awesome/g"' --notest-install --package liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
+  && rpmrebuild --change-spec-requires='sed "s/Requires:.*libmemcached[^.]*$/Requires: libmemcached-awesome/g"' --notest-install --package nginx-mod-oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm
 
-# Install liboauth2 module
+# Install liboauth2, liboauth2-nginx, and nginx-mod-oauth2 modules
 RUN rpm -ivh \
-  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm
-#   https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-nginx-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
-#   https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUTH2_VERSION}/nginx-mod-oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm
-
+  /root/rpmbuild/RPMS/x86_64/liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
+  "https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-nginx-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm" \
+  /root/rpmbuild/RPMS/x86_64/nginx-mod-oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm
+    
 ENTRYPOINT [ "tail", "-f", "/dev/null" ]
