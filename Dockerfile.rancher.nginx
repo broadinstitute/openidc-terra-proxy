@@ -1,0 +1,16 @@
+FROM rancher/nginx-ingress-controller:nginx-1.9.6-hardened1
+
+ENV LIBOAUTH2_VERSION=1.6.1 \
+  OAUTH2_VERSION=3.3.0
+
+USER root
+
+RUN wget "https://github.com/OpenIDC/liboauth2/releases/download/v1.6.2/liboauth2-1.6.2.tar.gz" \
+  && tar -xzf liboauth2-1.6.2.tar.gz -C/tmp
+
+WORKDIR /tmp/liboauth2-1.6.2
+
+RUN zypper --non-interactive install autoconf automake libtool gcc openssl openssl-devel awk curl curl-devel \
+  https://www.rpmfind.net/linux/opensuse/distribution/leap/15.6/repo/oss/x86_64/libjansson-devel-2.14-150000.3.5.1.x86_64.rpm
+
+RUN  ./autogen.sh && ./configure
