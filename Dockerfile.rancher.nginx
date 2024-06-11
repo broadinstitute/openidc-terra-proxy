@@ -45,3 +45,6 @@ RUN wget "https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUT
 WORKDIR /tmp/ngx_oauth2_module
 
 RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/tmp/nginx && make && make install
+
+# Cleanup symlinks
+RUN rm /tmp/nginx /tmp/liboauth2 /tmp/ngx_oauth2_module
