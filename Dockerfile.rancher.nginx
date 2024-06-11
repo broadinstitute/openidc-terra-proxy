@@ -13,14 +13,17 @@ RUN zypper --non-interactive install autoconf automake libtool gcc openssl opens
   https://www.rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libcjose0-0.6.2.2-1.3.x86_64.rpm \
   https://www.rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libcjose-devel-0.6.2.2-1.3.x86_64.rpm
 
+
+# create build directory
+RUN mkdir -p /build
+
 # grab nginx sources
-
 RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-  && tar -xzvf nginx-${NGINX_VERSION}.tar.gz -C/tmp \
-  && rm -rf /tmp/nginx \
-  && ln -s /tmp/nginx-${NGINX_VERSION} /tmp/nginx
+  && tar -xzvf nginx-${NGINX_VERSION}.tar.gz -C/build \
+  && rm -rf /build/nginx \
+  && ln -s /build/nginx-${NGINX_VERSION} /build/nginx
 
-WORKDIR /tmp/nginx
+WORKDIR /build/nginx
 
 RUN ./configure --with-debug --without-http_rewrite_module
 
@@ -28,23 +31,21 @@ RUN ./configure --with-debug --without-http_rewrite_module
 # https://github.com/OpenIDC/liboauth2
 
 RUN wget "https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}.tar.gz" \
-  && tar -xzf liboauth2-${LIBOAUTH2_VERSION}.tar.gz -C/tmp \
-  && ln -s /tmp/liboauth2-${LIBOAUTH2_VERSION} /tmp/liboauth2
+  && tar -xzf liboauth2-${LIBOAUTH2_VERSION}.tar.gz -C/build \
+  && ln -s /build/liboauth2-${LIBOAUTH2_VERSION} /build/liboauth2
 
-WORKDIR /tmp/liboauth2
+WORKDIR /build/liboauth2
 
-RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/tmp/nginx && make && make install
+RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && make && make install
 
 # build ngx_oauth2_module
 # https://github.com/OpenIDC/ngx_oauth2_module
 
 RUN wget "https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUTH2_VERSION}/ngx_oauth2_module-${OAUTH2_VERSION}.tar.gz" \
-  && tar -xzf ngx_oauth2_module-${OAUTH2_VERSION}.tar.gz -C/tmp \
-  && ln -s /tmp/ngx_oauth2_module-${OAUTH2_VERSION} /tmp/ngx_oauth2_module
+  && tar -xzf ngx_oauth2_module-${OAUTH2_VERSION}.tar.gz -C/build \
+  && ln -s /build/ngx_oauth2_module-${OAUTH2_VERSION} /build/ngx_oauth2_module
 
-WORKDIR /tmp/ngx_oauth2_module
+WORKDIR /build/ngx_oauth2_module
 
-RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/tmp/nginx && make && make install
+RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && make && make install
 
-# Cleanup symlinks
-RUN rm /tmp/nginx /tmp/liboauth2 /tmp/ngx_oauth2_module
