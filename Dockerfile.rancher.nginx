@@ -49,5 +49,6 @@ WORKDIR /build/ngx_oauth2_module
 
 RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && make && make install
 
-RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules
+RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
+  cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules/ngx_oauth2_module.so
 
