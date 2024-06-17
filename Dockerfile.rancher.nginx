@@ -52,6 +52,8 @@ RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && ma
 RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
   cp /usr/local/lib/liboauth2_nginx.so /etc/nginx/modules && \
   cp /usr/local/lib/liboauth2_nginx.so.0 /etc/nginx/modules && \
+  cp /usr/local/lib/liboauth2_nginx.so /usr/lib64 && \
+  cp /usr/local/lib/liboauth2_nginx.so.0 /usr/lib64 && \
   chown -R www-data:www-data /etc/nginx/modules/ && \
   chown -R www-data:www-data /usr/local/nginx/modules/
 
