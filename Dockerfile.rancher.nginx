@@ -36,7 +36,10 @@ RUN wget "https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VE
 
 WORKDIR /build/liboauth2
 
-RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && make && make install
+RUN ./autogen.sh \
+  && ./configure --with-apache=no --with-nginx=/build/nginx --with-compat \
+  && make \
+  && make install
 
 # build ngx_oauth2_module
 # https://github.com/OpenIDC/ngx_oauth2_module
@@ -47,7 +50,10 @@ RUN wget "https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUT
 
 WORKDIR /build/ngx_oauth2_module
 
-RUN ./autogen.sh && ./configure --with-apache=no --with-nginx=/build/nginx && make && make install
+RUN ./autogen.sh \
+  && ./configure --with-apache=no --with-nginx=/build/nginx --with-compat \
+  && make \
+  && make install
 
 RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
   cp /usr/local/lib/liboauth2_nginx.so /etc/nginx/modules && \
