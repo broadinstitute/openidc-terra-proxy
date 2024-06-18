@@ -91,4 +91,4 @@ RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
   chown -R www-data:www-data /etc/nginx/modules/ && \
   chown -R www-data:www-data /usr/local/nginx/modules/
 
-USER www-data
+RUN adduser -S -D -H -u 101 -h /usr/local/nginx -s /sbin/nologin -G www-data -g www-data www-data
