@@ -91,4 +91,4 @@ RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
   chown -R www-data:www-data /etc/nginx/modules/ && \
   chown -R www-data:www-data /usr/local/nginx/modules/
 
-EXPOSE 80 443
+USER www-data
