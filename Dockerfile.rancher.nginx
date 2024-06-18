@@ -90,3 +90,5 @@ RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
   cp /usr/local/lib/liboauth2.so.0.0.0 /usr/lib64 && \
   chown -R www-data:www-data /etc/nginx/modules/ && \
   chown -R www-data:www-data /usr/local/nginx/modules/
+
+EXPOSE 80 443
