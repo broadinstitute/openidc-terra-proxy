@@ -1,7 +1,5 @@
 # openidc-terra-proxy
 
-> This repo is DSP DevOps-managed, and was built off of [openidc-proxy](https://github.com/broadinstitute/openidc-proxy)'s [tcell_3_1_0](https://github.com/broadinstitute/openidc-proxy/tree/tcell_3_1_0) branch on 10/14/2021 based on [this conversation](https://broadinstitute.slack.com/archives/CADM7MZ35/p1634137067113800).
->
 > The `Bump, Tag, and Publish` action in this repo pushes images to `us.gcr.io/broad-dsp-gcr-public/openidc-terra-proxy`, see [here](https://console.cloud.google.com/gcr/images/broad-dsp-gcr-public/us/openidc-terra-proxy?project=broad-dsp-gcr-public).
 >
 > The README drawing on the openidc-proxy history is below:

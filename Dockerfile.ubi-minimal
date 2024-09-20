@@ -25,12 +25,6 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.
   hiredis-0.13.3-13.el8.x86_64 \
   && microdnf clean all
 
-# Install tcell module
-RUN mkdir -p /tmp/build && cd /tmp/build \
-  && wget https://us.static.tcell.insight.rapid7.com/downloads/apacheagent/apache24_tcellagent-3.1.0-linux-x86_64.tgz \ 
-  && tar -xzf apache24_tcellagent-3.1.0-linux-x86_64.tgz \
-  && cp -rfp apache_tcellagent-3.1.0-linux-x86_64/centos/mod_agenttcell.so /etc/httpd/modules/mod_agenttcell.so
-
 # Install mod_oauth2 module
 RUN rpm -ivh \
   https://mod-auth-openidc.org/downloads/cjose-0.6.1.5-2.el8.x86_64.rpm \
@@ -40,7 +34,6 @@ RUN rpm -ivh \
 
 # Copy configs
 COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
-COPY tcell.load /etc/httpd/conf.modules.d/99-tcell.load
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
 COPY www.conf /etc/php-fpm.d/www.conf
