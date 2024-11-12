@@ -1,1 +1,2 @@
 .github/workflows/* @broadinstitute/dsp-devops
+*   @broadinstitute/dsp-core-services
