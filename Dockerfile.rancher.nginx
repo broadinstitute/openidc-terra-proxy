@@ -1,0 +1,94 @@
+FROM rancher/nginx-ingress-controller:nginx-1.9.6-hardened1
+
+# NGINX_VERSION matches version in the base image
+ENV LIBOAUTH2_VERSION=1.6.2 \
+  OAUTH2_VERSION=3.4.0 \
+  NGINX_VERSION=1.21.4 \
+  LUA_NGX_VERSION=0.10.25 \
+  LUA_STREAM_NGX_VERSION=0.0.13 \
+  LUAJIT_LIB=/usr/local/lib \
+  LUA_LIB_DIR="$LUAJIT_LIB/lua" \
+  LUAJIT_INC=/usr/local/include/luajit-2.1 \
+  MORE_HEADERS_VERSION=0.37
+
+USER root
+
+# install dependencies
+RUN zypper --non-interactive install autoconf automake libtool gcc openssl openssl-devel awk curl curl-devel pcre-devel pcre2-devel \
+  https://www.rpmfind.net/linux/opensuse/distribution/leap/15.6/repo/oss/x86_64/libjansson-devel-2.14-150000.3.5.1.x86_64.rpm \
+  https://www.rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libcjose0-0.6.2.2-1.3.x86_64.rpm \
+  https://www.rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libcjose-devel-0.6.2.2-1.3.x86_64.rpm
+
+# create build directory
+RUN mkdir -p /build
+
+# grab lua-nginx-module sources
+RUN wget https://github.com/openresty/lua-nginx-module/archive/v$LUA_NGX_VERSION.tar.gz \
+  && tar -xzvf v$LUA_NGX_VERSION.tar.gz -C/build \
+  && rm -rf /build/lua-nginx-module \
+  && ln -s /build/lua-nginx-module-$LUA_NGX_VERSION /build/lua-nginx-module
+
+# grab lua-stream sources
+RUN wget "https://github.com/openresty/stream-lua-nginx-module/archive/v$LUA_STREAM_NGX_VERSION.tar.gz" \
+  && tar -xzvf v$LUA_STREAM_NGX_VERSION.tar.gz -C/build \
+  && rm -rf /build/stream-lua-nginx-module \
+  && ln -s /build/stream-lua-nginx-module-$LUA_STREAM_NGX_VERSION /build/stream-lua-nginx-module
+
+# grab headers-more-module sources
+RUN wget https://github.com/openresty/headers-more-nginx-module/archive/v$MORE_HEADERS_VERSION.tar.gz \
+  && tar -xzvf v$MORE_HEADERS_VERSION.tar.gz -C/build \
+  && rm -rf /build/headers-more-nginx-module \
+  && ln -s /build/headers-more-nginx-module-$MORE_HEADERS_VERSION /build/headers-more-nginx-module
+
+# grab nginx sources
+RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
+  && tar -xzvf nginx-${NGINX_VERSION}.tar.gz -C/build \
+  && rm -rf /build/nginx \
+  && ln -s /build/nginx-${NGINX_VERSION} /build/nginx
+
+WORKDIR /build/nginx
+
+RUN ./configure --prefix=/usr/local/nginx --conf-path=/etc/nginx/nginx.conf --modules-path=/etc/nginx/modules --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --lock-path=/var/lock/nginx.lock --pid-path=/run/nginx.pid --http-client-body-temp-path=/var/lib/nginx/body --http-fastcgi-temp-path=/var/lib/nginx/fastcgi --http-proxy-temp-path=/var/lib/nginx/proxy --http-scgi-temp-path=/var/lib/nginx/scgi --http-uwsgi-temp-path=/var/lib/nginx/uwsgi --with-debug --with-compat --with-pcre-jit --with-http_ssl_module --with-http_stub_status_module --with-http_realip_module --with-http_auth_request_module --with-http_addition_module --with-http_gzip_static_module --with-http_sub_module --with-http_v2_module --with-stream --with-stream_ssl_module --with-stream_realip_module --with-stream_ssl_preread_module --with-threads --with-http_secure_link_module --with-http_gunzip_module --with-file-aio --without-mail_pop3_module --without-mail_smtp_module --without-mail_imap_module --without-http_uwsgi_module --without-http_scgi_module --with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat -Werror=format-security -Wno-deprecated-declarations -fno-strict-aliasing -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -DTCP_FASTOPEN=23 -fPIC -I/root/.hunter/_Base/d45d77d/052b597/3b7ee27/Install/include -Wno-cast-function-type -m64 -mtune=generic' --with-ld-opt='-fPIE -fPIC -pie -Wl,-z,relro -Wl,-z,now -L/root/.hunter/_Base/d45d77d/052b597/3b7ee27/Install/lib' --user=www-data --group=www-data \
+  --add-module=/build/lua-nginx-module \
+  --add-module=/build/stream-lua-nginx-module \
+  --add-module=/build/headers-more-nginx-module \
+  && make && make install
+
+# build liboauth2 library
+# https://github.com/OpenIDC/liboauth2
+RUN wget "https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}.tar.gz" \
+  && tar -xzf liboauth2-${LIBOAUTH2_VERSION}.tar.gz -C/build \
+  && ln -s /build/liboauth2-${LIBOAUTH2_VERSION} /build/liboauth2
+
+WORKDIR /build/liboauth2
+
+RUN ./autogen.sh \
+  && ./configure --with-apache=no --with-nginx=/build/nginx \
+  && make \
+  && make install
+
+# build ngx_oauth2_module
+# https://github.com/OpenIDC/ngx_oauth2_module
+RUN wget "https://github.com/OpenIDC/ngx_oauth2_module/releases/download/v${OAUTH2_VERSION}/ngx_oauth2_module-${OAUTH2_VERSION}.tar.gz" \
+  && tar -xzf ngx_oauth2_module-${OAUTH2_VERSION}.tar.gz -C/build \
+  && ln -s /build/ngx_oauth2_module-${OAUTH2_VERSION} /build/ngx_oauth2_module
+
+WORKDIR /build/ngx_oauth2_module
+
+RUN ./autogen.sh \
+  && ./configure --with-nginx=/build/nginx --prefix=/usr/local/nginx --with-debug --with-compat --with-pcre-jit --with-http_ssl_module --with-http_stub_status_module --with-http_realip_module --with-http_auth_request_module --with-http_addition_module --with-http_gzip_static_module --with-http_sub_module --with-http_v2_module --with-stream --with-stream_ssl_module --with-stream_realip_module --with-stream_ssl_preread_module --with-threads --with-http_secure_link_module --with-http_gunzip_module --with-file-aio --without-mail_pop3_module --without-mail_smtp_module --without-mail_imap_module --without-http_uwsgi_module --without-http_scgi_module --with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat -Werror=format-security -Wno-deprecated-declarations -fno-strict-aliasing -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -DTCP_FASTOPEN=23 -fPIC -I/root/.hunter/_Base/d45d77d/052b597/3b7ee27/Install/include -Wno-cast-function-type -m64 -mtune=generic' --with-ld-opt='-fPIE -fPIC -pie -Wl,-z,relro -Wl,-z,now -L/root/.hunter/_Base/d45d77d/052b597/3b7ee27/Install/lib' --without-http_rewrite_module \
+  && make \
+  && make install
+
+RUN cp /usr/local/nginx/modules/ngx_oauth2_module.so /etc/nginx/modules && \
+  cp /usr/local/lib/liboauth2_nginx.so /etc/nginx/modules && \
+  cp /usr/local/lib/liboauth2_nginx.so.0 /etc/nginx/modules && \
+  cp /usr/local/lib/liboauth2_nginx.so /usr/lib64 && \
+  cp /usr/local/lib/liboauth2_nginx.so.0 /usr/lib64 && \
+  cp /usr/local/lib/liboauth2.so /usr/lib64 && \
+  cp /usr/local/lib/liboauth2.so.0 /usr/lib64 && \
+  cp /usr/local/lib/liboauth2.so.0.0.0 /usr/lib64 && \
+  chown -R www-data:www-data /etc/nginx/modules/ && \
+  chown -R www-data:www-data /usr/local/nginx/modules/
+
+RUN adduser -S -D -H -u 101 -h /usr/local/nginx -s /sbin/nologin -G www-data -g www-data www-data
