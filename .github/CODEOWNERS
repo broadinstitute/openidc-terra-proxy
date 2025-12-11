@@ -1,2 +1,2 @@
-.github/workflows/* @broadinstitute/dsp-devops
+.github/workflows/* @broadinstitute/manifold-sre
 *   @broadinstitute/dsp-core-services
