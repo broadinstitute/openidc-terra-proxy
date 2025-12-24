@@ -3,6 +3,10 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 ENV LIBOAUTH2_VERSION=1.4.5.1 \
   OAUTH2_VERSION=3.2.3
 
+# Update curl rpms
+RUN rpm -Uvh libcurl7155-7.15.5-17.cf.fc19.x86_64.rpm \
+  curl-8.1.2-1.0.cf.fc19.x86_64.rpm \
+  libcurl-8.1.2-1.0.cf.fc19.x86_64.rpm
 # Install dependencies
 RUN microdnf --nodocs -y install \
   httpd \
@@ -17,6 +21,7 @@ RUN microdnf --nodocs -y install \
   libmemcached \
   mod_ssl \
   mod_ldap \
+  && microdnf -y update \
   && microdnf clean all
 
 # Install hiredis (dependency of liboauth2) from EPEL
@@ -51,6 +56,7 @@ RUN chmod a+x /usr/bin/run-httpd \
 
 EXPOSE 80
 EXPOSE 443
+
 
 # Apache runs graceful stop only upon SIGWINCH. Normal SIGTERM is an immediate stop.
 # GracefulShutdownTimeout directive configured via graceful_shutdown.conf.
