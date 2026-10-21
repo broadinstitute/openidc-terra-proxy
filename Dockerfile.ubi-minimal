@@ -54,6 +54,7 @@ COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf /
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
 COPY www.conf /etc/php-fpm.d/www.conf
+COPY php-hardening.ini /etc/php.d/99-hardening.ini
 COPY setup-httpd.sh /tmp/build/setup-httpd.sh
 
 # Setup httpd and php-fpm
