@@ -6,9 +6,8 @@ ENV LIBOAUTH2_VERSION=1.4.5.1 \
 # Install dependencies
 RUN microdnf --nodocs -y install \
   httpd \
-  php \
-  php-json \
-  php-curl \
+  python3.12 \
+  python3.12-mod_wsgi \
   procps \
   wget \
   tar \
@@ -34,18 +33,14 @@ RUN rpm -ivh \
 
 # Copy configs
 COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf /etc/httpd/conf.d/
-COPY introspect.php /app/introspect/index.php
+COPY introspect.py /app/introspect/introspect.py
 COPY run-httpd /usr/bin
-COPY www.conf /etc/php-fpm.d/www.conf
 COPY setup-httpd.sh /tmp/build/setup-httpd.sh
 
-# Setup httpd and php-fpm
+# Setup httpd
 RUN chmod a+x /usr/bin/run-httpd \
   && chmod a+x /tmp/build/setup-httpd.sh \
   && /tmp/build/setup-httpd.sh \
-  && mkdir -p /run/php-fpm \
-  && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
-  && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
 
@@ -57,4 +52,4 @@ EXPOSE 443
 # https://httpd.apache.org/docs/2.4/stopping.html
 STOPSIGNAL SIGWINCH
 
-CMD php-fpm & /usr/bin/run-httpd
+CMD ["/usr/bin/run-httpd"]
