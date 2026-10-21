@@ -3,9 +3,25 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 ENV LIBOAUTH2_VERSION=1.4.5.1 \
   OAUTH2_VERSION=3.2.3
 
+# Red Hat's php:8.2 module stream lags upstream security releases, so take PHP 8.2 from Remi's
+# repository instead. The AppStream php module has to be disabled or it masks Remi's packages.
+# The signing key is pinned in this repo rather than fetched at build time. Its fingerprint,
+# 6B38 FEA7 231F 87F5 2B9C  A9D8 5550 9759 5F11 735A, matches https://rpms.remirepo.net/KEYS.txt.
+COPY RPM-GPG-KEY-remi2018 /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018 \
+  && printf '%s\n' \
+    '[remi-php82]' \
+    'name=Remi PHP 8.2 for Enterprise Linux 8' \
+    'baseurl=https://rpms.remirepo.net/enterprise/8/php82/$basearch/' \
+    'enabled=1' \
+    'gpgcheck=1' \
+    'gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018' \
+    'module_hotfixes=1' \
+    > /etc/yum.repos.d/remi-php82.repo \
+  && microdnf -y module disable php
+
 # Install dependencies
-RUN microdnf module enable php:8.2 \
-  && microdnf --nodocs -y install \
+RUN microdnf --nodocs -y install \
   httpd \
   php \
   php-json \
@@ -38,6 +54,7 @@ COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf /
 COPY introspect.php /app/introspect/index.php
 COPY run-httpd /usr/bin
 COPY www.conf /etc/php-fpm.d/www.conf
+COPY php-hardening.ini /etc/php.d/99-hardening.ini
 COPY setup-httpd.sh /tmp/build/setup-httpd.sh
 
 # Setup httpd and php-fpm
@@ -46,7 +63,6 @@ RUN chmod a+x /usr/bin/run-httpd \
   && /tmp/build/setup-httpd.sh \
   && mkdir -p /run/php-fpm \
   && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
-  && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
 
