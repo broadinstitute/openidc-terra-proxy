@@ -4,7 +4,8 @@ ENV LIBOAUTH2_VERSION=1.4.5.1 \
   OAUTH2_VERSION=3.2.3
 
 # Install dependencies
-RUN microdnf --nodocs -y install \
+RUN microdnf module enable php:8.2 \
+  && microdnf --nodocs -y install \
   httpd \
   php \
   php-json \
