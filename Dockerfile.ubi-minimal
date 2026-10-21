@@ -3,9 +3,21 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 ENV LIBOAUTH2_VERSION=1.4.5.1 \
   OAUTH2_VERSION=3.2.3
 
+# Red Hat's php:8.2 module stream lags upstream security releases, so take PHP 8.2 from Remi's
+# repository instead. The AppStream php module has to be disabled or it masks Remi's packages.
+RUN rpm --import https://rpms.remirepo.net/RPM-GPG-KEY-remi2018 \
+  && printf '%s\n' \
+    '[remi-php82]' \
+    'name=Remi PHP 8.2 for Enterprise Linux 8' \
+    'baseurl=https://rpms.remirepo.net/enterprise/8/php82/$basearch/' \
+    'enabled=1' \
+    'gpgcheck=1' \
+    'module_hotfixes=1' \
+    > /etc/yum.repos.d/remi-php82.repo \
+  && microdnf -y module disable php
+
 # Install dependencies
-RUN microdnf module enable php:8.2 \
-  && microdnf --nodocs -y install \
+RUN microdnf --nodocs -y install \
   httpd \
   php \
   php-json \
@@ -46,7 +58,6 @@ RUN chmod a+x /usr/bin/run-httpd \
   && /tmp/build/setup-httpd.sh \
   && mkdir -p /run/php-fpm \
   && sed -i 's/www-data/apache/g' /etc/php-fpm.d/www.conf \
-  && sed -i 's/\/run\/php\/php7\.2-fpm\.sock/\/run\/php-fpm\/www.sock/g' /etc/php-fpm.d/www.conf \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
 
