@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/http/cgi"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -64,6 +65,21 @@ func (i *introspector) tokeninfo(accessToken string) map[string]any {
 	return info
 }
 
+// number converts a numeric string to a JSON number. tokeninfo returns exp as a string,
+// but RFC 7662 makes it a number, and liboauth2 only checks exp when it is one.
+// Anything else is returned unchanged.
+func number(v any) any {
+	s, ok := v.(string)
+	if !ok {
+		return v
+	}
+	n, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return v
+	}
+	return n
+}
+
 func (i *introspector) introspect(accessToken string) any {
 	if accessToken == "" {
 		return inactive
@@ -78,7 +94,7 @@ func (i *introspector) introspect(accessToken string) any {
 		Sub:       info["sub"],
 		Username:  info["email"],
 		Email:     info["email"],
-		Exp:       info["exp"],
+		Exp:       number(info["exp"]),
 		TokenType: "bearer",
 		Aud:       info["aud"],
 	}

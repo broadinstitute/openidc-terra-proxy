@@ -28,11 +28,12 @@ RUN microdnf --nodocs -y install \
   mod_ldap \
   && microdnf clean all
 
-# Install hiredis (dependency of liboauth2) from EPEL. The liboauth2 RPM requires its
-# exact library soname, so the version is not pinned here.
+# Install hiredis (dependency of liboauth2) from EPEL. Install it by the library soname
+# the liboauth2 RPM requires rather than by version: any EPEL build with that soname
+# works, and if EPEL moves to a new soname this step fails with "No package matches".
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
   && microdnf --nodocs -y install \
-  hiredis \
+  'libhiredis.so.1.0.0()(64bit)' \
   && microdnf clean all
 
 # Install mod_oauth2 module. The el9 RPMs require a package named libmemcached, which
@@ -46,11 +47,12 @@ RUN mkdir /tmp/rpms && cd /tmp/rpms \
   && curl -fsSLO https://github.com/OpenIDC/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm \
   && { rpm -i --test *.rpm 2>&1 | grep 'is needed by' | grep -v '^\s*libmemcached is needed by' && exit 1 || true; } \
   && rpm -ivh --nodeps *.rpm \
+  && test -f /usr/lib64/httpd/modules/mod_oauth2.so \
   && ! ldd /usr/lib64/httpd/modules/mod_oauth2.so | grep 'not found' \
   && rm -rf /tmp/rpms
 
 # Copy configs
-COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf introspect.conf /etc/httpd/conf.d/
+COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf oauth2-encoding.conf ssl_fips.conf introspect.conf /etc/httpd/conf.d/
 COPY --from=introspect /introspect /app/introspect/introspect
 COPY run-httpd /usr/bin
 COPY setup-httpd.sh /tmp/build/setup-httpd.sh
