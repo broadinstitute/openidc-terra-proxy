@@ -40,8 +40,11 @@ The proxy containers then run under emulation; `compose.yaml` and the image test
 already request `linux/amd64`, so nothing else changes. Expect the suite to take
 under a minute.
 
-- macOS: Docker Desktop emulates x86_64 out of the box. Turning on "Use Rosetta for
-  x86_64/amd64 emulation on Apple Silicon" (Settings > General) makes it faster.
+- macOS: Docker Desktop emulates x86_64 out of the box. Leave "Use Rosetta for
+  x86_64/amd64 emulation on Apple Silicon" (Settings > General) turned off: under
+  Rosetta, php-fpm crashes at startup (`rosetta error: futex(FUTEX_LOCK_PI_PRIVATE)`),
+  and the tests that rely on introspection fail. php-fpm runs fine on real x86_64
+  (see terra-helmfile#6519).
 - Linux: register x86_64 emulation once per boot, then check it works:
 
   ```sh
