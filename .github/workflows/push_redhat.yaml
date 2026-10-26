@@ -72,6 +72,25 @@ jobs:
       - name: Build image
         run: "docker build -f Dockerfile.ubi-minimal -t ${{ steps.image-name.outputs.name }} ."
 
+      - name: Set up Python for the tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run tests
+        env:
+          PROXY_IMAGE: ${{ steps.image-name.outputs.name }}
+        run: |
+          pip install -r tests/requirements.txt
+          pytest tests
+
+      - name: Upload test container logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-container-logs
+          path: tests/.generated/compose.log
+
       - name: Run Trivy vulnerability scanner
         # From https://github.com/broadinstitute/dsp-appsec-trivy-action
         uses: broadinstitute/dsp-appsec-trivy-action@v1
