@@ -64,6 +64,17 @@ RUN chmod a+x /usr/bin/run-httpd \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
 
+# Run OpenSSL in FIPS mode even when the host kernel isn't (terra-dev GKE nodes have no FIPS
+# mode). Red Hat's OpenSSL loads its FIPS provider when OPENSSL_FORCE_FIPS_MODE is set, so
+# ssl_fips.conf's SSLFIPS On works instead of crashing httpd, and FIPS becomes the default for
+# algorithms fetched through OpenSSL's EVP interface. It doesn't cover code that calls
+# OpenSSL's deprecated low-level functions or doesn't use OpenSSL, and it isn't a FIPS-mode
+# host. GOLANG_FIPS=1 does the same for Red Hat's Go; the introspection endpoint also gets it
+# from introspect.conf, because httpd doesn't pass the container environment to CGI programs.
+# Set after the install steps, so the build itself isn't in FIPS mode.
+ENV OPENSSL_FORCE_FIPS_MODE=1 \
+  GOLANG_FIPS=1
+
 EXPOSE 80
 EXPOSE 443
 
