@@ -1,0 +1,81 @@
+# Test stack: the image under test in three configurations, a fake Google, and an
+# echo backend. conftest.py generates .generated/ (certificates, signing key) and
+# brings the stack up and down; it isn't meant to be started by hand.
+name: openidc-terra-proxy-tests
+
+x-proxy: &proxy
+  image: ${PROXY_IMAGE:-openidc-terra-proxy:test}
+  # The image only builds for amd64 (its RPMs are x86_64).
+  platform: linux/amd64
+  depends_on: [fake-google, echo]
+  ports: ["127.0.0.1::443", "127.0.0.1::80"]
+  environment: &proxy-env
+    LOG_LEVEL: warn
+    PROXY_PATH: /open
+    PROXY_URL: http://echo:8080/open
+    PROXY_PATH2: /api
+    PROXY_URL2: http://echo:8080/api
+    PROXY_PATH3: /register
+    PROXY_URL3: http://echo:8080/register
+
+services:
+  # The image's own site.conf and oauth2.conf, unchanged.
+  proxy-default:
+    <<: *proxy
+    environment:
+      <<: *proxy-env
+      SERVER_NAME: proxy-default.test
+    networks:
+      default:
+        # The default oauth2.conf redirects introspection to https://${SERVER_NAME}/.
+        aliases: [proxy-default.test]
+    volumes:
+      - ./.generated/ca.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro
+      - ./.generated/proxy.pem:/etc/ssl/certs/server.crt:ro
+      - ./.generated/proxy-key.pem:/etc/ssl/private/server.key:ro
+
+  # The image's site.conf with a mounted oauth2.conf that verifies JWTs locally.
+  proxy-chain:
+    <<: *proxy
+    environment:
+      <<: *proxy-env
+      SERVER_NAME: proxy-chain.test
+    volumes:
+      - ./.generated/ca.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro
+      - ./.generated/proxy.pem:/etc/ssl/certs/server.crt:ro
+      - ./.generated/proxy-key.pem:/etc/ssl/private/server.key:ro
+      - ./configs/chain-oauth2.conf:/etc/httpd/conf.d/oauth2.conf:ro
+
+  # Both site.conf and oauth2.conf replaced, the way deployments mount their own.
+  proxy-minimal:
+    <<: *proxy
+    environment:
+      <<: *proxy-env
+      SERVER_NAME: proxy-minimal.test
+    volumes:
+      - ./.generated/ca.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro
+      - ./.generated/proxy.pem:/etc/ssl/certs/server.crt:ro
+      - ./.generated/proxy-key.pem:/etc/ssl/private/server.key:ro
+      - ./configs/chain-oauth2.conf:/etc/httpd/conf.d/oauth2.conf:ro
+      - ./configs/minimal-site.conf:/etc/httpd/conf.d/site.conf:ro
+
+  fake-google:
+    image: python:3.13-alpine
+    command: ["python", "-u", "/fakes/fake_google.py"]
+    environment:
+      TLS_CERT: /pki/google.pem
+      TLS_KEY: /pki/google-key.pem
+      JWKS_FILE: /pki/jwks.json
+    volumes:
+      - ./fakes:/fakes:ro
+      - ./.generated:/pki:ro
+    ports: ["127.0.0.1::8080"]
+    networks:
+      default:
+        aliases: [www.googleapis.com, accounts.google.com, oauth2.googleapis.com]
+
+  echo:
+    image: python:3.13-alpine
+    command: ["python", "-u", "/fakes/echo.py"]
+    volumes:
+      - ./fakes:/fakes:ro

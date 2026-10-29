@@ -1,0 +1,4 @@
+# Not used by the image builds; keeps them out of the build context.
+.git/
+# Test suite only; nothing in the image comes from here (see tests/README.md).
+tests/
