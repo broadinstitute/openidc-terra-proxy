@@ -1,62 +1,58 @@
 # Build the introspection endpoint (introspect/). go-toolset comes from the UBI repo
-# rather than the ubi8/go-toolset image, which lags it; Go compiles its standard
+# rather than the ubi9/go-toolset image, which can lag it; Go compiles its standard
 # library (crypto/tls, net/http) into the binary, so the toolchain version matters.
-FROM registry.access.redhat.com/ubi8/ubi-minimal AS introspect
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS introspect
 RUN microdnf --nodocs -y install go-toolset && microdnf clean all
 WORKDIR /src
 COPY introspect/ .
 RUN go vet ./... && go test ./... && go build -trimpath -o /introspect .
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal
+FROM registry.access.redhat.com/ubi9/ubi-minimal
 
-ENV LIBOAUTH2_VERSION=1.4.5.1 \
-  OAUTH2_VERSION=3.2.3
+# The OpenIDC packages below are built for RHEL 9 only from these versions on.
+ENV CJOSE_VERSION=0.6.2.8 \
+  LIBOAUTH2_VERSION=2.4.0 \
+  OAUTH2_VERSION=4.2.0
 
-# Red Hat's php:8.2 module stream lags upstream security releases, so take PHP 8.2 from Remi's
-# repository instead. The AppStream php module has to be disabled or it masks Remi's packages.
-# The signing key is pinned in this repo rather than fetched at build time. Its fingerprint,
-# 6B38 FEA7 231F 87F5 2B9C  A9D8 5550 9759 5F11 735A, matches https://rpms.remirepo.net/KEYS.txt.
-COPY RPM-GPG-KEY-remi2018 /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018
-RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018 \
-  && printf '%s\n' \
-    '[remi-php82]' \
-    'name=Remi PHP 8.2 for Enterprise Linux 8' \
-    'baseurl=https://rpms.remirepo.net/enterprise/8/php82/$basearch/' \
-    'enabled=1' \
-    'gpgcheck=1' \
-    'gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi2018' \
-    'module_hotfixes=1' \
-    > /etc/yum.repos.d/remi-php82.repo \
-  && microdnf -y module disable php
-
-# Install dependencies
+# Install dependencies. util-linux provides rev, which run-httpd uses.
 RUN microdnf --nodocs -y install \
   httpd \
-  procps \
+  procps-ng \
+  util-linux \
   wget \
   tar \
   openssl \
   jansson \
-  libmemcached \
+  libmemcached-awesome \
   mod_ssl \
   mod_ldap \
   && microdnf clean all
 
-# Install hiredis (dependency of liboauth2) from EPEL
-RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
+# Install hiredis (dependency of liboauth2) from EPEL. Install it by the library soname
+# the liboauth2 RPM requires rather than by version: any EPEL build with that soname
+# works, and if EPEL moves to a new soname this step fails with "No package matches".
+RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
   && microdnf --nodocs -y install \
-  hiredis-0.13.3-13.el8.x86_64 \
+  'libhiredis.so.1.0.0()(64bit)' \
   && microdnf clean all
 
-# Install mod_oauth2 module
-RUN rpm -ivh \
-  https://mod-auth-openidc.org/downloads/cjose-0.6.1.5-2.el8.x86_64.rpm \
-  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
-  https://github.com/zmartzone/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-apache-${LIBOAUTH2_VERSION}-1.el8.x86_64.rpm \
-  https://github.com/zmartzone/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el8.x86_64.rpm
+# Install mod_oauth2 module. The el9 RPMs require a package named libmemcached, which
+# neither UBI 9 nor EPEL 9 provides; libmemcached-awesome provides the same libraries
+# (libmemcached.so.11, libmemcachedutil.so.2). rpm --test confirms that is the only unmet
+# dependency, --nodeps skips it, and ldd confirms every library the module needs resolves.
+RUN mkdir /tmp/rpms && cd /tmp/rpms \
+  && curl -fsSLO https://github.com/OpenIDC/cjose/releases/download/v${CJOSE_VERSION}/cjose-${CJOSE_VERSION}-1.el9.x86_64.rpm \
+  && curl -fsSLO https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
+  && curl -fsSLO https://github.com/OpenIDC/liboauth2/releases/download/v${LIBOAUTH2_VERSION}/liboauth2-apache-${LIBOAUTH2_VERSION}-1.el9.x86_64.rpm \
+  && curl -fsSLO https://github.com/OpenIDC/mod_oauth2/releases/download/v${OAUTH2_VERSION}/mod_oauth2-${OAUTH2_VERSION}-1.el9.x86_64.rpm \
+  && { rpm -i --test *.rpm 2>&1 | grep 'is needed by' | grep -v '^\s*libmemcached is needed by' && exit 1 || true; } \
+  && rpm -ivh --nodeps *.rpm \
+  && test -f /usr/lib64/httpd/modules/mod_oauth2.so \
+  && ! ldd /usr/lib64/httpd/modules/mod_oauth2.so | grep 'not found' \
+  && rm -rf /tmp/rpms
 
 # Copy configs
-COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf ssl_fips.conf introspect.conf /etc/httpd/conf.d/
+COPY site.conf graceful_shutdown.conf mpm_event.conf oauth2.conf oauth2-encoding.conf ssl_fips.conf introspect.conf /etc/httpd/conf.d/
 COPY --from=introspect /introspect /app/introspect/introspect
 COPY run-httpd /usr/bin
 COPY setup-httpd.sh /tmp/build/setup-httpd.sh
@@ -67,6 +63,17 @@ RUN chmod a+x /usr/bin/run-httpd \
   && /tmp/build/setup-httpd.sh \
   && sed -i 's/Listen 80/Listen 80\nListen 443/' /etc/httpd/conf/httpd.conf \
   && rm -rf /tmp/build
+
+# Run OpenSSL in FIPS mode even when the host kernel isn't (terra-dev GKE nodes have no FIPS
+# mode). Red Hat's OpenSSL loads its FIPS provider when OPENSSL_FORCE_FIPS_MODE is set, so
+# ssl_fips.conf's SSLFIPS On works instead of crashing httpd, and FIPS becomes the default for
+# algorithms fetched through OpenSSL's EVP interface. It doesn't cover code that calls
+# OpenSSL's deprecated low-level functions or doesn't use OpenSSL, and it isn't a FIPS-mode
+# host. GOLANG_FIPS=1 does the same for Red Hat's Go; the introspection endpoint also gets it
+# from introspect.conf, because httpd doesn't pass the container environment to CGI programs.
+# Set after the install steps, so the build itself isn't in FIPS mode.
+ENV OPENSSL_FORCE_FIPS_MODE=1 \
+  GOLANG_FIPS=1
 
 EXPOSE 80
 EXPOSE 443

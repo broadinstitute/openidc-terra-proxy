@@ -56,7 +56,7 @@ func TestValidToken(t *testing.T) {
 		"sub":        "1234",
 		"username":   "user@example.org",
 		"email":      "user@example.org",
-		"exp":        "1700000000",
+		"exp":        float64(1700000000), // a JSON number, decoded as float64
 		"token_type": "bearer",
 		"aud":        "client.apps.googleusercontent.com",
 	}
@@ -113,5 +113,20 @@ func TestOnlyPost(t *testing.T) {
 	newIntrospector("http://unused", time.Second).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/introspect/", nil))
 	if rec.Code != http.StatusInternalServerError || rec.Body.String() != "only POST supported" {
 		t.Errorf("got %d %q", rec.Code, rec.Body.String())
+	}
+}
+
+func TestNumber(t *testing.T) {
+	for _, tc := range []struct {
+		in, want any
+	}{
+		{"1700000000", int64(1700000000)},
+		{"soon", "soon"},
+		{float64(1700000000), float64(1700000000)},
+		{nil, nil},
+	} {
+		if got := number(tc.in); got != tc.want {
+			t.Errorf("number(%#v) = %#v, want %#v", tc.in, got, tc.want)
+		}
 	}
 }
